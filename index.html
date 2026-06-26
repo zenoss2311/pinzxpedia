@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>NIK Analyzer • RIZKY</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,'Segoe UI',sans-serif;}
+        body{background:linear-gradient(135deg,#0f172a,#1e1b4b);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+        .card{max-width:650px;width:100%;background:rgba(255,255,255,0.08);backdrop-filter:blur(12px);border-radius:48px;padding:28px 24px 36px;box-shadow:0 25px 45px -12px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);position:relative;}
+        .watermark{position:absolute;bottom:15px;right:20px;font-size:12px;color:rgba(255,255,255,0.2);font-weight:bold;letter-spacing:2px;pointer-events:none;}
+        .badge{display:inline-block;background:#4f46e5;padding:6px 16px;border-radius:40px;font-size:0.75rem;font-weight:600;color:white;margin-bottom:20px;}
+        h1{font-size:2rem;font-weight:700;background:linear-gradient(to right,#c7d2fe,#a78bfa);background-clip:text;-webkit-background-clip:text;color:transparent;margin-bottom:8px;}
+        .sub{color:#a5b4fc;font-size:0.85rem;margin-bottom:32px;border-left:3px solid #4f46e5;padding-left:14px;}
+        .credit{background:rgba(79,70,229,0.2);border-radius:40px;padding:6px 14px;font-size:0.75rem;display:inline-block;margin-bottom:16px;color:#c7d2fe;border:1px solid rgba(79,70,229,0.5);}
+        .input-group{display:flex;flex-direction:column;gap:12px;margin-bottom:28px;}
+        label{font-weight:600;color:#e2e8f0;font-size:0.85rem;}
+        input{background:#1e293b;border:1px solid #334155;padding:14px 20px;border-radius:48px;font-size:1rem;color:white;outline:none;}
+        input:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(79,70,229,0.3);}
+        button{background:linear-gradient(95deg,#4f46e5,#7c3aed);border:none;padding:14px;border-radius:48px;font-weight:700;font-size:1rem;color:white;cursor:pointer;transition:0.2s;margin-top:8px;}
+        button:hover{transform:scale(1.01);background:linear-gradient(95deg,#6366f1,#8b5cf6);box-shadow:0 8px 20px -8px #4f46e5;}
+        .result-card{background:#0f172a;border-radius:32px;padding:20px;margin-top:28px;border:1px solid #334155;}
+        .result-title{display:flex;align-items:center;gap:10px;font-weight:700;color:#cbd5e1;border-bottom:1px solid #334155;padding-bottom:12px;margin-bottom:18px;}
+        .data-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px dashed #1e293b;}
+        .data-label{font-weight:500;color:#94a3b8;}
+        .data-value{font-weight:600;color:#e0e7ff;text-align:right;word-break:break-word;max-width:60%;}
+        .info-note{font-size:0.7rem;color:#5b6e8c;text-align:center;margin-top:20px;background:#1e293b;padding:10px;border-radius:24px;}
+        .signature{font-size:0.8rem;color:#a78bfa;text-align:center;margin-top:20px;font-weight:500;letter-spacing:1px;}
+        @media (max-width:480px){.card{padding:20px 18px;}.data-row{flex-direction:column;gap:4px;}.data-value{text-align:left;max-width:100%;}}
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="watermark">⚡ RIZKY ⚡</div>
+    <div class="badge">🔍 NIK ANALYZER</div>
+    <h1>Data dari NIK</h1>
+    <div class="sub">✨ Masukkan 16 digit NIK</div>
+    <div class="credit">💎 Powered by RIZKY</div>
+
+    <div class="input-group">
+        <label>🔢 NIK (16 digit)</label>
+        <input type="text" id="nikInput" placeholder="3305260112120001" maxlength="16" inputmode="numeric">
+        <button id="analyzeBtn">🔍 Proses NIK</button>
+    </div>
+
+    <div id="resultContainer"></div>
+    <div class="signature">🧪 RIZKY — Developer</div>
+</div>
+
+<script>
+(function(){
+    const provinsi = {
+        "11":"Aceh","12":"Sumatera Utara","13":"Sumatera Barat","14":"Riau","15":"Jambi","16":"Sumatera Selatan",
+        "17":"Bengkulu","18":"Lampung","19":"Kep. Bangka Belitung","21":"Kep. Riau","31":"DKI Jakarta","32":"Jawa Barat",
+        "33":"Jawa Tengah","34":"DI Yogyakarta","35":"Jawa Timur","36":"Banten","51":"Bali","52":"Nusa Tenggara Barat",
+        "53":"Nusa Tenggara Timur","61":"Kalimantan Barat","62":"Kalimantan Tengah","63":"Kalimantan Selatan",
+        "64":"Kalimantan Timur","65":"Kalimantan Utara","71":"Sulawesi Utara","72":"Sulawesi Tengah","73":"Sulawesi Selatan",
+        "74":"Sulawesi Tenggara","75":"Gorontalo","76":"Sulawesi Barat","81":"Maluku","82":"Maluku Utara",
+        "91":"Papua Barat","94":"Papua","95":"Papua Pegunungan","96":"Papua Selatan","97":"Papua Tengah","98":"Papua Barat Daya"
+    };
+    const kabupaten = {
+        "1101":"Simeulue","1102":"Aceh Singkil","1103":"Aceh Selatan","1104":"Aceh Tenggara","1105":"Aceh Timur","1106":"Aceh Tengah","1107":"Aceh Barat","1108":"Aceh Besar","1109":"Pidie","1110":"Bireuen","1111":"Aceh Utara","1112":"Aceh Barat Daya","1113":"Gayo Lues","1114":"Aceh Tamiang","1115":"Nagan Raya","1116":"Aceh Jaya","1117":"Bener Meriah","1118":"Pidie Jaya","1171":"Banda Aceh","1172":"Sabang","1173":"Langsa","1174":"Lhokseumawe","1175":"Subulussalam",
+        "1201":"Tapanuli Tengah","1202":"Tapanuli Utara","1203":"Tapanuli Selatan","1204":"Nias","1205":"Langkat","1206":"Karo","1207":"Deli Serdang","1208":"Simalungun","1209":"Asahan","1210":"Labuhanbatu","1211":"Dairi","1212":"Toba","1213":"Mandailing Natal","1214":"Nias Selatan","1215":"Pakpak Bharat","1216":"Humbang Hasundutan","1217":"Samosir","1218":"Serdang Bedagai","1219":"Batu Bara","1220":"Padang Lawas Utara","1221":"Padang Lawas","1222":"Labuhanbatu Selatan","1223":"Labuhanbatu Utara","1224":"Nias Utara","1225":"Nias Barat","1271":"Medan","1272":"Binjai","1273":"Padang Sidempuan","1274":"Gunungsitoli","1275":"Tebing Tinggi","1276":"Pematang Siantar","1277":"Tanjung Balai","1278":"Sibolga",
+        "1301":"Pesisir Selatan","1302":"Solok","1303":"Sijunjung","1304":"Tanah Datar","1305":"Padang Pariaman","1306":"Agam","1307":"Lima Puluh Kota","1308":"Pasaman","1309":"Solok Selatan","1310":"Dharmasraya","1311":"Pasaman Barat","1312":"Kepulauan Mentawai","1371":"Padang","1372":"Solok","1373":"Sawahlunto","1374":"Padang Panjang","1375":"Bukittinggi","1376":"Payakumbuh","1377":"Pariaman","1378":"Agam","1379":"Tanah Datar",
+        "1401":"Kampar","1402":"Indragiri Hulu","1403":"Bengkal","1404":"Indragiri Hilir","1405":"Pelalawan","1406":"Rokan Hulu","1407":"Rokan Hilir","1408":"Siak","1409":"Kuantan Singingi","1410":"Kepulauan Meranti","1471":"Pekanbaru","1472":"Dumai",
+        "1501":"Kerinci","1502":"Merangin","1503":"Sarolangun","1504":"Batanghari","1505":"Muaro Jambi","1506":"Tanjung Jabung Barat","1507":"Tanjung Jabung Timur","1508":"Tebo","1509":"Bungo","1571":"Jambi","1572":"Sungai Penuh",
+        "1601":"Ogan Komering Ulu","1602":"Ogan Komering Ilir","1603":"Muara Enim","1604":"Lahat","1605":"Musi Rawas","1606":"Musi Banyuasin","1607":"Banyuasin","1608":"Ogan Komering Ulu Selatan","1609":"Ogan Komering Ulu Timur","1610":"Ogan Ilir","1611":"Empat Lawang","1612":"Penukal Abab Lematang Ilir","1613":"Musi Rawas Utara","1671":"Palembang","1672":"Prabumulih","1673":"Lubuklinggau","1674":"Pagar Alam",
+        "1701":"Bengkulu Selatan","1702":"Rejang Lebong","1703":"Bengkulu Utara","1704":"Kaur","1705":"Seluma","1706":"Mukomuko","1707":"Lebong","1708":"Kepahiang","1709":"Bengkulu Tengah","1771":"Bengkulu",
+        "1801":"Lampung Barat","1802":"Tanggamus","1803":"Lampung Selatan","1804":"Lampung Timur","1805":"Lampung Tengah","1806":"Lampung Utara","1807":"Way Kanan","1808":"Tulang Bawang","1809":"Pesawaran","1810":"Pringsewu","1811":"Mesuji","1812":"Tulang Bawang Barat","1813":"Pesisir Barat","1871":"Bandar Lampung","1872":"Metro",
+        "1901":"Bangka","1902":"Belitung","1903":"Bangka Barat","1904":"Bangka Tengah","1905":"Belitung Timur","1906":"Bangka Selatan","1971":"Pangkal Pinang",
+        "2101":"Karimun","2102":"Bintan","2103":"Natuna","2104":"Lingga","2105":"Kepulauan Anambas","2171":"Tanjung Pinang","2172":"Batam",
+        "3101":"Kep. Seribu","3171":"Jakarta Selatan","3172":"Jakarta Timur","3173":"Jakarta Pusat","3174":"Jakarta Barat","3175":"Jakarta Utara",
+        "3201":"Bogor","3202":"Sukabumi","3203":"Cianjur","3204":"Bandung","3205":"Garut","3206":"Tasikmalaya","3207":"Ciamis","3208":"Kuningan","3209":"Cirebon","3210":"Majalengka","3211":"Sumedang","3212":"Indramayu","3213":"Subang","3214":"Purwakarta","3215":"Karawang","3216":"Bekasi","3217":"Bandung Barat","3218":"Pangandaran","3271":"Bogor","3272":"Sukabumi","3273":"Bandung","3274":"Cirebon","3275":"Bekasi","3276":"Depok","3277":"Cimahi","3278":"Tasikmalaya","3279":"Banjar",
+        "3301":"Cilacap","3302":"Banyumas","3303":"Purbalingga","3304":"Banjarnegara","3305":"Kebumen","3306":"Purworejo","3307":"Wonosobo","3308":"Magelang","3309":"Boyolali","3310":"Klaten","3311":"Sukoharjo","3312":"Wonogiri","3313":"Karanganyar","3314":"Sragen","3315":"Grobogan","3316":"Blora","3317":"Rembang","3318":"Pati","3319":"Kudus","3320":"Jepara","3321":"Demak","3322":"Semarang","3323":"Temanggung","3324":"Kendal","3325":"Batang","3326":"Pekalongan","3327":"Pemalang","3328":"Tegal","3329":"Brebes","3371":"Magelang","3372":"Surakarta","3373":"Salatiga","3374":"Semarang","3375":"Pekalongan","3376":"Tegal",
+        "3401":"Kulon Progo","3402":"Bantul","3403":"Gunung Kidul","3404":"Sleman","3471":"Yogyakarta",
+        "3501":"Pacitan","3502":"Ponorogo","3503":"Trenggalek","3504":"Tulungagung","3505":"Blitar","3506":"Kediri","3507":"Malang","3508":"Lumajang","3509":"Jember","3510":"Banyuwangi","3511":"Bondowoso","3512":"Situbondo","3513":"Probolinggo","3514":"Pasuruan","3515":"Sidoarjo","3516":"Mojokerto","3517":"Jombang","3518":"Nganjuk","3519":"Madiun","3520":"Magetan","3521":"Ngawi","3522":"Bojonegoro","3523":"Tuban","3524":"Lamongan","3525":"Gresik","3526":"Bangkalan","3527":"Sampang","3528":"Pamekasan","3529":"Sumenep","3571":"Kediri","3572":"Blitar","3573":"Malang","3574":"Probolinggo","3575":"Pasuruan","3576":"Mojokerto","3577":"Madiun","3578":"Surabaya","3579":"Batu",
+        "3601":"Pandeglang","3602":"Lebak","3603":"Tangerang","3604":"Serang","3671":"Tangerang","3672":"Cilegon","3673":"Serang","3674":"Tangerang Selatan",
+        "5101":"Jembrana","5102":"Tabanan","5103":"Badung","5104":"Gianyar","5105":"Klungkung","5106":"Bangli","5107":"Karangasem","5108":"Buleleng","5171":"Denpasar",
+        "5201":"Lombok Barat","5202":"Lombok Tengah","5203":"Lombok Timur","5204":"Lombok Utara","5205":"Sumbawa","5206":"Dompu","5207":"Bima","5208":"Sumbawa Barat","5271":"Mataram","5272":"Bima",
+        "5301":"Sumba Barat","5302":"Sumba Timur","5303":"Kupang","5304":"Timor Tengah Selatan","5305":"Timor Tengah Utara","5306":"Belu","5307":"Alor","5308":"Lembata","5309":"Flores Timur","5310":"Sikka","5311":"Ende","5312":"Ngada","5313":"Manggarai","5314":"Rote Ndao","5315":"Manggarai Barat","5316":"Nagekeo","5317":"Manggarai Timur","5318":"Sumba Tengah","5319":"Sumba Barat Daya","5320":"Sabu Raijua","5321":"Malaka","5371":"Kupang",
+        "6101":"Sambas","6102":"Bengkayang","6103":"Landak","6104":"Mempawah","6105":"Sanggau","6106":"Ketapang","6107":"Sintang","6108":"Melawi","6109":"Sekadau","6110":"Kapuas Hulu","6171":"Pontianak","6172":"Singkawang",
+        "6201":"Kotawaringin Barat","6202":"Kotawaringin Timur","6203":"Gunung Mas","6204":"Barito Selatan","6205":"Barito Timur","6206":"Kapuas","6207":"Pulang Pisau","6208":"Seruyan","6209":"Lamandau","6210":"Sukamara","6211":"Katingan","6212":"Murung Raya","6213":"Barito Utara","6271":"Palangka Raya",
+        "6301":"Tanah Laut","6302":"Kota Baru","6303":"Banjar","6304":"Barito Kuala","6305":"Tapin","6306":"Hulu Sungai Selatan","6307":"Hulu Sungai Tengah","6308":"Hulu Sungai Utara","6309":"Tabalong","6310":"Tanah Bumbu","6311":"Balangan","6371":"Banjarmasin","6372":"Banjarbaru",
+        "6401":"Paser","6402":"Kutai Barat","6403":"Kutai Kartanegara","6404":"Kutai Timur","6405":"Berau","6406":"Mahakam Ulu","6471":"Balikpapan","6472":"Samarinda","6473":"Bontang","6474":"Nusantara",
+        "6501":"Bulungan","6502":"Malinau","6503":"Nunukan","6504":"Tana Tidung","6571":"Tarakan",
+        "7101":"Bolaang Mongondow","7102":"Minahasa","7103":"Kepulauan Sangihe","7104":"Kepulauan Talaud","7105":"Minahasa Selatan","7106":"Minahasa Utara","7107":"Bolaang Mongondow Utara","7108":"Siau Tagulandang Biaro","7109":"Minahasa Tenggara","7110":"Bolaang Mongondow Selatan","7111":"Bolaang Mongondow Timur","7171":"Manado","7172":"Bitung","7173":"Tomohon","7174":"Kotamobagu",
+        "7201":"Banggai","7202":"Poso","7203":"Donggala","7204":"Toli-toli","7205":"Buol","7206":"Parigi Moutong","7207":"Tojo Una-una","7208":"Morowali","7209":"Banggai Laut","7210":"Banggai Kepulauan","7211":"Morowali Utara","7271":"Palu",
+        "7301":"Kepulauan Selayar","7302":"Bulukumba","7303":"Bantaeng","7304":"Jeneponto","7305":"Takalar","7306":"Gowa","7307":"Sinjai","7308":"Maros","7309":"Pangkajene Kepulauan","7310":"Barru","7311":"Bone","7312":"Soppeng","7313":"Wajo","7314":"Sidrap","7315":"Pinrang","7316":"Enrekang","7317":"Luwu","7318":"Tana Toraja","7319":"Luwu Utara","7320":"Luwu Timur","7321":"Toraja Utara","7371":"Makassar","7372":"Pare-pare","7373":"Palopo",
+        "7401":"Buton","7402":"Muna","7403":"Konawe","7404":"Kolaka","7405":"Konawe Selatan","7406":"Bombana","7407":"Wakatobi","7408":"Kolaka Utara","7409":"Buton Utara","7410":"Konawe Utara","7411":"Kolaka Timur","7412":"Konawe Kepulauan","7413":"Muna Barat","7414":"Buton Tengah","7415":"Buton Selatan","7471":"Kendari","7472":"Baubau",
+        "7501":"Boalemo","7502":"Gorontalo","7503":"Pohuwato","7504":"Bone Bolango","7505":"Gorontalo Utara","7571":"Gorontalo",
+        "7601":"Majene","7602":"Mamasa","7603":"Mamuju","7604":"Mamuju Utara","7605":"Polewali Mandar","7606":"Mamuju Tengah","7671":"Mamuju",
+        "8101":"Maluku Tenggara Barat","8102":"Maluku Tenggara","8103":"Maluku Tengah","8104":"Buru","8105":"Seram Bagian Barat","8106":"Seram Bagian Timur","8107":"Kepulauan Aru","8108":"Maluku Barat Daya","8109":"Buru Selatan","8171":"Ambon","8172":"Tual",
+        "8201":"Halmahera Barat","8202":"Halmahera Tengah","8203":"Halmahera Utara","8204":"Halmahera Selatan","8205":"Kepulauan Sula","8206":"Halmahera Timur","8207":"Pulau Morotai","8208":"Pulau Taliabu","8271":"Ternate","8272":"Tidore Kepulauan",
+        "9101":"Fakfak","9102":"Kaimana","9103":"Teluk Wondama","9104":"Teluk Bintuni","9105":"Manokwari","9106":"Sorong Selatan","9107":"Sorong","9108":"Raja Ampat","9109":"Tambrauw","9110":"Maybrat","9111":"Manokwari Selatan","9112":"Pegunungan Arfak","9171":"Sorong",
+        "9401":"Merauke","9402":"Jayawijaya","9403":"Jayapura","9404":"Nabire","9405":"Kepulauan Yapen","9406":"Biak Numfor","9407":"Paniai","9408":"Puncak Jaya","9409":"Mimika","9410":"Boven Digoel","9411":"Mappi","9412":"Asmat","9413":"Yahukimo","9414":"Pegunungan Bintang","9415":"Tolikara","9416":"Sarmi","9417":"Keerom","9418":"Waropen","9419":"Supiori","9420":"Mamberamo Raya","9421":"Nduga","9422":"Lanny Jaya","9423":"Mamberamo Tengah","9424":"Yalimo","9425":"Puncak","9426":"Dogiyai","9427":"Intan Jaya","9428":"Deiyai","9471":"Jayapura"
+    };
+    const kecamatan = {
+        "330526":"Karanggayam","330501":"Kebumen","330502":"Buayan","330503":"Adimulyo","330504":"Kuwarasan","330505":"Alian",
+        "317101":"Jagakarsa","317102":"Pasar Minggu","317103":"Mampang Prapatan","327301":"Andir","327302":"Cicendo","327303":"Bandung Wetan"
+    };
+    function parseNIK(nik){
+        if(!nik || nik.length!==16 || !/^\d+$/.test(nik)) return {ok:false, pesan:"NIK harus 16 digit angka!"};
+        let kodeProv = nik.substr(0,2);
+        let kodeKab = nik.substr(0,4);
+        let kodeKec = nik.substr(0,6);
+        let lahir = nik.substr(6,6);
+        let hari = parseInt(lahir.substr(0,2),10);
+        let bulan = parseInt(lahir.substr(2,2),10);
+        let tahun = parseInt(lahir.substr(4,2),10);
+        let kelamin = (hari>40) ? "Perempuan" : "Laki-laki";
+        if(hari>40) hari -= 40;
+        let tahunFull = (tahun>=0 && tahun<=23) ? 2000+tahun : 1900+tahun;
+        let tglValid = (hari>=1 && hari<=31 && bulan>=1 && bulan<=12);
+        let tglLahir = tglValid ? `${hari.toString().padStart(2,'0')}/${bulan.toString().padStart(2,'0')}/${tahunFull}` : "Format tanggal salah";
+        let namaProv = provinsi[kodeProv] || "Tidak diketahui";
+        let namaKab = kabupaten[kodeKab] || "Tidak diketahui";
+        let namaKec = kecamatan[kodeKec] || "Kecamatan tidak terdata";
+        return {
+            ok:true,
+            prov:namaProv,
+            kabkot:namaKab,
+            kec:namaKec,
+            gender:kelamin,
+            tgl:tglLahir
+        };
+    }
+    document.getElementById('analyzeBtn').addEventListener('click',function(){
+        let nik = document.getElementById('nikInput').value.trim();
+        let hasil = parseNIK(nik);
+        let container = document.getElementById('resultContainer');
+        if(!hasil.ok){
+            container.innerHTML = `<div class="result-card"><div class="result-title">⚠️ Gagal</div><div class="data-row"><span class="data-label">Pesan:</span><span class="data-value">${hasil.pesan}</span></div></div>`;
+            return;
+        }
+        container.innerHTML = `
+            <div class="result-card">
+                <div class="result-title">🧾 Informasi NIK</div>
+                <div class="data-row"><span class="data-label">📍 Provinsi</span><span class="data-value">${hasil.prov}</span></div>
+                <div class="data-row"><span class="data-label">🏙️ Kabupaten/Kota</span><span class="data-value">${hasil.kabkot}</span></div>
+                <div class="data-row"><span class="data-label">🗺️ Kecamatan</span><span class="data-value">${hasil.kec}</span></div>
+                <div class="data-row"><span class="data-label">🎂 Tanggal Lahir</span><span class="data-value">${hasil.tgl}</span></div>
+                <div class="data-row"><span class="data-label">⚥ Jenis Kelamin</span><span class="data-value">${hasil.gender}</span></div>
+                <div class="info-note">ℹ️ Data berdasarkan kode wilayah & tanggal lahir dalam NIK.</div>
+            </div>
+        `;
+    });
+    document.getElementById('nikInput').addEventListener('keypress',function(e){
+        if(e.key==='Enter') document.getElementById('analyzeBtn').click();
+    });
+})();
+</script>
+</body>
+</html>
